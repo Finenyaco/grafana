@@ -340,7 +340,6 @@ func TestMiddlewareContext(t *testing.T) {
 	})
 
 	middlewareScenario(t, "When anonymous access is enabled", func(t *testing.T, sc *scenarioContext) {
-		sc.mockSQLStore.ExpectedOrg = &models.Org{Id: 1, Name: sc.cfg.AnonymousOrgName}
 		sc.orgService.ExpectedOrg = &org.Org{ID: 1, Name: sc.cfg.AnonymousOrgName}
 		sc.fakeReq("GET", "/").exec()
 
