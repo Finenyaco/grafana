@@ -14,6 +14,7 @@ import (
 
 	"github.com/grafana/grafana/pkg/api/routing"
 	busmock "github.com/grafana/grafana/pkg/bus/mock"
+	"github.com/grafana/grafana/pkg/infra/db"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	acmock "github.com/grafana/grafana/pkg/services/accesscontrol/mock"
@@ -31,7 +32,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/secrets/database"
 	secretsManager "github.com/grafana/grafana/pkg/services/secrets/manager"
-	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/tag/tagimpl"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
@@ -72,7 +72,7 @@ func SetupTestEnv(tb testing.TB, baseInterval time.Duration) (*ngalert.AlertNG, 
 	*cfg.UnifiedAlerting.Enabled = true
 
 	m := metrics.NewNGAlert(prometheus.NewRegistry())
-	sqlStore := sqlstore.InitTestDB(tb)
+	sqlStore := db.InitTestDB(tb)
 	secretsService := secretsManager.SetupTestService(tb, database.ProvideSecretsStore(sqlStore))
 	dashboardStore := databasestore.ProvideDashboardStore(sqlStore, sqlStore.Cfg, featuremgmt.WithFeatures(), tagimpl.ProvideService(sqlStore, sqlStore.Cfg))
 

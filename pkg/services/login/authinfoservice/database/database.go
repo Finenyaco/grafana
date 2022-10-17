@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"time"
 
+	"github.com/grafana/grafana/pkg/infra/db"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/login"
@@ -71,7 +72,7 @@ func (s *AuthInfoStore) GetAuthInfo(ctx context.Context, query *models.GetAuthIn
 	var has bool
 	var err error
 
-	err = s.sqlStore.WithDbSession(ctx, func(sess *sqlstore.DBSession) error {
+	err = s.sqlStore.WithDbSession(ctx, func(sess *db.Session) error {
 		has, err = sess.Desc("created").Get(userAuth)
 		return err
 	})
@@ -145,7 +146,7 @@ func (s *AuthInfoStore) SetAuthInfo(ctx context.Context, cmd *models.SetAuthInfo
 		authUser.OAuthExpiry = cmd.OAuthToken.Expiry
 	}
 
-	return s.sqlStore.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
+	return s.sqlStore.WithTransactionalDbSession(ctx, func(sess *db.Session) error {
 		_, err := sess.Insert(authUser)
 		return err
 	})
@@ -161,7 +162,7 @@ func (s *AuthInfoStore) UpdateAuthInfoDate(ctx context.Context, authInfo *models
 		UserId:     authInfo.UserId,
 		AuthModule: authInfo.AuthModule,
 	}
-	return s.sqlStore.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
+	return s.sqlStore.WithTransactionalDbSession(ctx, func(sess *db.Session) error {
 		_, err := sess.Cols("created").Update(authInfo, cond)
 		return err
 	})
@@ -209,7 +210,7 @@ func (s *AuthInfoStore) UpdateAuthInfo(ctx context.Context, cmd *models.UpdateAu
 		AuthModule: cmd.AuthModule,
 	}
 
-	return s.sqlStore.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
+	return s.sqlStore.WithTransactionalDbSession(ctx, func(sess *db.Session) error {
 		upd, err := sess.Update(authUser, cond)
 		s.logger.Debug("Updated user_auth", "user_id", cmd.UserId, "auth_module", cmd.AuthModule, "rows", upd)
 		return err
@@ -217,7 +218,7 @@ func (s *AuthInfoStore) UpdateAuthInfo(ctx context.Context, cmd *models.UpdateAu
 }
 
 func (s *AuthInfoStore) DeleteAuthInfo(ctx context.Context, cmd *models.DeleteAuthInfoCommand) error {
-	return s.sqlStore.WithTransactionalDbSession(ctx, func(sess *sqlstore.DBSession) error {
+	return s.sqlStore.WithTransactionalDbSession(ctx, func(sess *db.Session) error {
 		_, err := sess.Delete(cmd.UserAuth)
 		return err
 	})
